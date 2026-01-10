@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+/* 🔥 ESSENCIAL PARA ANIMAR */
+@property --border-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@theme {
+   --default-font-family: Inter, sans-serif;
+   --shadow-shape: 0px 8px 8px rgba(0, 0, 0, 0.1), 0px 4px 4px rgba(0, 0, 0, 0.1), 0px 2px 2px rgba(0, 0, 0, 0.1), 0px 0px 0px 1px rgba(0, 0, 0, 0.1), inset 0px 0px 0px 1px rgba(255, 255, 255, 0.03), inset 0px 1px 0px rgba(255, 255, 255, 0.03);
+   --shadow-content:  0px 0px 0px 1px rgba(0, 0, 0, 0.25), inset 0px 1px 0px rgba(255, 255, 255, 0.02), inset 0px 0px 0px 1px rgba(255, 255, 255, 0.02);
+   --text-xxs: 0.625rem;
+
+   --animate-border: border 2s linear infinite;
+
+   @keyframes border{
+      from {
+         --border-angle: 0deg;
+      }
+      to {
+         --border-angle: 360deg;
+      }
+   }
+}
+
+@layer{
+   body {
+    @apply bg-zinc-950 text-zinc-100 antialiased;
+  }
+}
+
+/* utility reutilizável */
+@layer utilities {
+    .border-gradient {
+    --border-angle: 0deg;
+
+    background:
+      linear-gradient(
+        180deg,
+        theme(--color-zinc-900),
+        theme(--color-zinc-900)
+      ) padding-box,
+      conic-gradient(
+        from var(--border-angle),
+        transparent 70%,
+        theme(--color-indigo-500),
+        theme(--color-indigo-300),
+        theme(--color-indigo-500),
+        transparent
+      ) border-box;
+
+    border: 1px solid transparent;
+  }
+
+  .animate-border {
+    animation: var(--animate-border);
+  }
+}
+
+
+
