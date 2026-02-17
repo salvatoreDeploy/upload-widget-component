@@ -28,3 +28,4 @@ export async function uploadFileToStorage({ file, onProgress }: UploadFileToStog
     url: response.data.url
   }
 }
+

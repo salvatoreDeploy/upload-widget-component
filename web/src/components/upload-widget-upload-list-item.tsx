@@ -4,6 +4,8 @@ import { Button } from "./ui/button";
 import { motion } from "motion/react"
 import { useUploads, type Upload } from "../store-states/uploads";
 import { formatBytes } from "../utils/format-bytes";
+import { useState } from "react";
+import { handleDownload } from "../http/downloading-file";
 
 interface UploadWidgetUploadListItemProps {
   upload: Upload
@@ -37,8 +39,10 @@ export function UploadWidgetUploadListItem({ upload, uploadId }: UploadWidgetUpl
           <span className="line-through">{formatBytes(upload.originalSizeInBytes)}</span>
           <div className="size-1 rounded-full bg-zinc-700" />
           <span>
-            300KB
-            <span className="text-green-400 ml-1">-94%</span>
+            {formatBytes(upload.compressedSizeInBytes ?? 0)}
+            {upload.compressedSizeInBytes && (
+              <span className="text-green-400 ml-1">-{Math.round((upload.originalSizeInBytes - upload.compressedSizeInBytes) * 100 / upload.originalSizeInBytes)}%</span>
+            )}
           </span>
           <div className="size-1 rounded-full bg-zinc-700" />
           {upload.status === 'progress' && <span>{progress}%</span>}
@@ -57,12 +61,12 @@ export function UploadWidgetUploadListItem({ upload, uploadId }: UploadWidgetUpl
       </Progress.Root>
 
       <div className="absolute top-2.5 right-2.5 flex items-center gap-1">
-        <Button disabled={upload.status !== 'success'} size="icon-sm">
+        <Button aria-disabled={upload.status !== 'success'} onClick={() => handleDownload({ upload })} size="icon-sm">
           <Download className="size-4" strokeWidth={1.5} />
           <span className="sr-only">Download compressed image</span>
         </Button>
 
-        <Button disabled={!upload.remoteUrl} onClick={() => upload.remoteUrl && navigator.clipboard.writeText(upload.remoteUrl)} size="icon-sm">
+        <Button disabled={!upload.remoteUrl} onClick={() => upload.remoteUrl && navigator.clipboard.writeText(upload.remoteUrl)} size="icon-sm" asChild>
           <Link2 className="size-4" strokeWidth={1.5} />
           <span className="sr-only">Copy remote URL</span>
         </Button>
