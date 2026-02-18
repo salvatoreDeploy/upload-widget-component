@@ -4,7 +4,6 @@ import { Button } from "./ui/button";
 import { motion } from "motion/react"
 import { useUploads, type Upload } from "../store-states/uploads";
 import { formatBytes } from "../utils/format-bytes";
-import { useState } from "react";
 import { handleDownload } from "../http/downloading-file";
 
 interface UploadWidgetUploadListItemProps {
@@ -16,6 +15,7 @@ interface UploadWidgetUploadListItemProps {
 export function UploadWidgetUploadListItem({ upload, uploadId }: UploadWidgetUploadListItemProps) {
 
   const cancelUpload = useUploads(store => store.cancelUpload)
+  const retryUplaod = useUploads(store => store.retryUpload)
 
   const progress = Math.min(
     upload.compressedSizeInBytes ? Math.round((upload.uploadSizeInBytes * 100) / upload.compressedSizeInBytes) : 0,
@@ -32,7 +32,7 @@ export function UploadWidgetUploadListItem({ upload, uploadId }: UploadWidgetUpl
       <div className="flex flex-col gap-1">
         <span className="text-xs font-medium flex items-center gap-1">
           <ImageUp className="size-3 text-zinc-300" strokeWidth={1.5} />
-          <span>{upload.name}</span>
+          <span className="max-w-45 truncate">{upload.name}</span>
         </span>
 
         <span className="text-xxs text-zinc-400 flex gap-1.5 items-center">
@@ -60,18 +60,18 @@ export function UploadWidgetUploadListItem({ upload, uploadId }: UploadWidgetUpl
         />
       </Progress.Root>
 
-      <div className="absolute top-2.5 right-2.5 flex items-center gap-1">
+      <div className="absolute top-2 right-2 flex items-center gap-1">
         <Button aria-disabled={upload.status !== 'success'} onClick={() => handleDownload({ upload })} size="icon-sm">
           <Download className="size-4" strokeWidth={1.5} />
           <span className="sr-only">Download compressed image</span>
         </Button>
 
-        <Button disabled={!upload.remoteUrl} onClick={() => upload.remoteUrl && navigator.clipboard.writeText(upload.remoteUrl)} size="icon-sm" asChild>
+        <Button disabled={!upload.remoteUrl} onClick={() => upload.remoteUrl && navigator.clipboard.writeText(upload.remoteUrl)} size="icon-sm">
           <Link2 className="size-4" strokeWidth={1.5} />
           <span className="sr-only">Copy remote URL</span>
         </Button>
 
-        <Button disabled={['canceled', 'error'].includes(upload.status)} size="icon-sm">
+        <Button disabled={!['canceled', 'error'].includes(upload.status)} size="icon-sm" onClick={() => retryUplaod(uploadId)}>
           <RefreshCcw className="size-4" strokeWidth={1.5} />
           <span className="sr-only">Retry upload</span>
         </Button>

@@ -9,11 +9,11 @@ interface downloadFIleInterface {
 export async function handleDownload({ upload }: downloadFIleInterface) {
 
   if (!upload.remoteUrl) {
-      throw new Error("Remote URL is not available");
+    throw new Error("Remote URL is not available");
   }
 
   const response = await axios.get(upload.remoteUrl, {
-      responseType: "blob",
+    responseType: "blob",
   });
 
     const blobUrl = URL.createObjectURL(response.data);

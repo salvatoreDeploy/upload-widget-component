@@ -9,7 +9,7 @@ import { compressImage } from "../utils/compress-image";
 export interface Upload{
   name: string
   file: File
-  abortController: AbortController,
+  abortController?: AbortController,
   status: 'progress' | 'success' | 'error' | 'canceled'
   uploadSizeInBytes: number,
   compressedSizeInBytes?: number
@@ -21,6 +21,7 @@ type UploadState = {
   uploads: Map<string, Upload>
   addUploads: (files: File[]) => void
   cancelUpload: (uploadId: string) => void
+  retryUpload: (uploadId: string) => void
 }
 
 enableMapSet()
@@ -48,6 +49,16 @@ export const useUploads = create<UploadState, [['zustand/immer', never]]>(immer(
       return
     }
 
+    const abortController = new AbortController()
+
+    updateUpload(uploadId, {
+      uploadSizeInBytes: 0,
+      remoteUrl: undefined,
+      compressedSizeInBytes: undefined,
+      abortController,
+      status: "progress"
+    })
+
     try {
       const compressedFile = await compressImage({
         file: upload.file,
@@ -66,7 +77,7 @@ export const useUploads = create<UploadState, [['zustand/immer', never]]>(immer(
           })
         },
       },
-        { signal: upload.abortController.signal })
+        { signal: abortController.signal })
 
       updateUpload(uploadId, {
         status: 'success',
@@ -97,19 +108,18 @@ export const useUploads = create<UploadState, [['zustand/immer', never]]>(immer(
       return
     }
 
-    upload.abortController.abort()
+    upload.abortController?.abort()
 
   }
 
   function addUploads(files: File[]) {
     for (const file of files) {
       const uploadId = crypto.randomUUID()
-      const abortController = new AbortController()
+
 
       const upload: Upload = {
         name: file.name,
         file,
-        abortController,
         status: 'progress',
         originalSizeInBytes: file.size,
         uploadSizeInBytes: 0
@@ -123,10 +133,15 @@ export const useUploads = create<UploadState, [['zustand/immer', never]]>(immer(
     }
   }
 
+  function retryUpload(uplaodId: string) {
+    processUpload(uplaodId)
+  }
+
   return {
     uploads: new Map(),
     addUploads,
-    cancelUpload
+    cancelUpload,
+    retryUpload
   }
 
 })
